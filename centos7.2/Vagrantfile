@@ -24,9 +24,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision :shell, :path => "bootstrap.sh"
 
+  config.vm.provision "docker"
+
   config.vm.define :c7201 do |c7201|
     # uncomment the line below to set up the ambari dev environment
-    # c7201.vm.provision :shell, :path => "dev-bootstrap.sh"
+    c7201.vm.provision :shell, :path => "ambari-bootstrap.sh"
     c7201.vm.hostname = "c7201.ambari.apache.org"
     c7201.vm.network :private_network, ip: "192.168.72.101"
   end
