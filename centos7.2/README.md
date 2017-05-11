@@ -30,7 +30,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 * remove all OSes except `redhat7`. 
 * Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-209` is latest at the time of writing.
 * Click the eye icon and get the `HDP repo url` and `HDP-UTILS repo url`
-* Fill `HDP-3.0` section with your HDP repo url such as  `http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-209`
+* Fill `HDP-3.0` section with your HDP repo url such as: `http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-209`
 * Fill `HDP-UTILS-1.1.0.211`section with such as `http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7`
 ##### Page ``Install Options``
 * Fill the Target Hosts with below information if you have only provisioned 3 hosts
@@ -46,17 +46,16 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 
 ##### Page `Assign Slaves and Clients`
 * Unselect `NFSGateway` as that is not required for testing.
-##### Page `Customize Services`
-* In `YARN->Settings`, set `Node memory`  and `Maximum Container Size` to 1024. It's set to 1023 by default. Values less than 1024 will make default app submission fail.
+* Select `all` for NodeManager.
 
 ### Configurations
-* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN component and restart all YARN services.
+* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN componen and restart all YARN services. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom yarn-site` section. 
 
      **yarn-site.xml**
 
     | Name        | Value      |
     |-------------|------------|
-    | yarn.nodemanager.container-executor.class | org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor |
+    | *yarn.nodemanager.container-executor.class | org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor |
     | yarn.nodemanager.runtime.linux.docker.default-container-network | bridge |   
     | hadoop.registry.dns.bind-address | c7202.ambari.apache.org |
     | hadoop.registry.dns.bind-port | 83|   
@@ -91,12 +90,19 @@ Select a host where you want to start Yarn-DNS and Rest API server. I recommand 
    sudo su - -c "/usr/hdp/current/hadoop-yarn-resourcemanager/sbin/yarn-daemon.sh start servicesapi" root
    ```
 * `TODO start new YARN UI` 
-* Setup `/user/root` direcotry on hdfs:
+* Setup `/user/root` direcotry on hdfs, this directory is used for storing service specific definitions.
     ```
     sudo su hdfs
     hdfs dfs -mkdir /user/root
     hdfs dfs -chown root:hdfs /user/root
     ```
+* `Optional` Pre-install slider framework jars to expediate app submission.
+
+    ```
+    sudo su hdfs
+    yarn slider dependency --upload
+    ``` 
+
 ## Step 4 - Install DNSmasq on your mac
 
 This is required to make Yarn-DNS serve the DNS queries for your cluster. Replace `ycloud.dev` with your own domain name in below commands as needed.
@@ -106,7 +112,7 @@ This is required to make Yarn-DNS serve the DNS queries for your cluster. Replac
     ```
     scutil --dns
     ```
-* Note that the script and config assumes you provisioned `3` hosts and choose `c7202.ambari.apache.org` as the DNS host and `ycloud.dev` as the value for `hadoop.registry.dns.domain-name` in previous config.  If you provisioned more than 3 hosts, you need to edit `dnsmasq.conf` in folder `ambari-vagrant/centos7.2` to append more hosts and also edit `installDNSmasq.sh`  to replace your settings as required.
+* Note that the script assumes you choose `c7202.ambari.apache.org` as the Yarn-DNS host and `ycloud.dev` as the value for `hadoop.registry.dns.domain-name` in previous config.  If you have different configs, you need to edit `installDNSmasq.sh` to replace your settings accordingly.
 
 ## Running the tests
 This test lets you launch a centos6 docker container on YARN.
@@ -133,7 +139,7 @@ This test lets you launch a centos6 docker container on YARN.
         ]
     }
     ```
-* Check if app named `ycloud-test` is running and container is launched.
+* Check if app named `ycloud-test` is running and container is launched at RM UI (http://c7201.ambari.apache.org:8088).
 * Check if Yarn-DNS is working by pinging the container. Replace the ContainerId below with your actual `ContainerId` and use `-` instead of `_`.  For example, if you have ContainerId as such `container_e03_1494449095838_0004_01_000002`, try:
     ```
     ping ctr-e03-1494449095838_0004-01-000002.ycloud.dev

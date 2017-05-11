@@ -19,7 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/centos-7.2/versions/2.3.1/providers/virtualbox.box"
 
   config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", 3072] # RAM allocated to each VM
+    vb.customize ["modifyvm", :id, "--memory", 3300] # RAM allocated to each VM
   end
 
   config.vm.provision :shell, :path => "bootstrap.sh"
