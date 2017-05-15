@@ -40,7 +40,8 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     c7203.ambari.apache.org
     ```
 * Select the `insecure_private_key` from centos7.2 home directory
-
+##### Page ``Customize Services``
+* In ``YARN -> Settings``, set `Node memory` and `Maximum Container Size (Memory)` to be larger or equal to `1024`
 ##### Page ``Choose Services``
 * Select services `HDFS`, `YARN + MapReduce2`, `ZooKeeper`.
 
@@ -71,7 +72,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     ```
 * Run below command on every host with your OKTA username and password to login. This will pull down the docker images for later testing. Note that until [YARN-5428](https://issues.apache.org/jira/browse/YARN-5428) gets resolved, we have to manually pull down the images.
     ```
-    docker login registry.eng.hortonworks.com`
+    docker login registry.eng.hortonworks.com
     docker pull registry.eng.hortonworks.com/hortonworks/base-centos6:0.1.0.0-30
     ```
 
