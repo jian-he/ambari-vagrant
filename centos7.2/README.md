@@ -19,7 +19,7 @@ Run below command from the centos7.2 home direcotory
 ```
 ./up.sh 3
 ```
-This will take a while, it'll let vagrant bring up a hdp cluster with 3 nodes. Optonally, you can specify the number of nodes up to 10. I recommand to select 3 as that can avoid additonal manual steps to edit the configs.
+This will take a while, it'll let vagrant bring up a hdp cluster with 3 nodes. Optonally, you can specify the number of nodes up to 10. I recommend to select 3 as that can avoid additional manual steps to edit the configs.
 Once this is done, your ambari server should be brought up at http://c7201.ambari.apache.org:8080
 
 ## Step 2 - Deploy HDP-3 cluster with Ambari
@@ -30,7 +30,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 * remove all OSes except `redhat7`. 
 * Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-209` is latest at the time of writing.
 * Click the eye icon and get the `HDP repo url` and `HDP-UTILS repo url`
-* Fill `HDP-3.0` section with your HDP repo url such as: `http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-209`
+* Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-210`
 * Fill `HDP-UTILS-1.1.0.211`section with such as `http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7`
 ##### Page ``Install Options``
 * Fill the Target Hosts with below information if you have only provisioned 3 hosts
@@ -43,14 +43,14 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 ##### Page ``Customize Services``
 * In ``YARN -> Settings``, set `Node memory` and `Maximum Container Size (Memory)` to be larger or equal to `1024`
 ##### Page ``Choose Services``
-* Select services `HDFS`, `YARN + MapReduce2`, `ZooKeeper`.
+* Select services `HDFS`, `YARN + MapReduce2`, `ZooKeeper`, `Hbase`
 
 ##### Page `Assign Slaves and Clients`
 * Unselect `NFSGateway` as that is not required for testing.
-* Select `all` for NodeManager.
+* Select `all` for DataNode, NodeManager, RegionServer and HBase Client
 
 ### Configurations
-* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN componen and restart all YARN services. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom yarn-site` section. 
+* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN component and restart all YARN services. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom yarn-site` section. 
 
      **yarn-site.xml**
 
@@ -77,7 +77,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     ```
 
 ## Step 3 - Start Yarn-DNS, Rest API server and UI server
-Select a host where you want to start Yarn-DNS and Rest API server. I recommand to pick `c7202.ambari.apache.org` as that can avoid addional steps to edit configs.
+Select a host where you want to start Yarn-DNS and Rest API server. I recommand to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
 * Login to host `c7202`
     ```
     vagrant ssh c7202
@@ -97,7 +97,7 @@ Select a host where you want to start Yarn-DNS and Rest API server. I recommand 
     hdfs dfs -mkdir /user/root
     hdfs dfs -chown root:hdfs /user/root
     ```
-* `Optional` Pre-install slider framework jars to expediate app submission.
+* `Optional` Pre-install slider framework jars to expedite app submission.
 
     ```
     sudo su hdfs
