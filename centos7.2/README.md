@@ -46,8 +46,8 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 * Select services `HDFS`, `YARN + MapReduce2`, `ZooKeeper`, `Hbase`
 
 ##### Page `Assign Slaves and Clients`
-* Unselect `NFSGateway` as that is not required for testing.
-* Select `all` for DataNode, NodeManager, RegionServer and HBase Client
+* Unselect `NFSGateway`, `Phoenix Query Server` as that is not required for testing.
+* Select `all` for `DataNode`, `NodeManager`, `RegionServer` and `Client`.
 
 ### Configurations
 * After Ambari successfully installed HDP-3 cluster, set below configurations in YARN component and restart all YARN services. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom yarn-site` section. 
@@ -64,7 +64,17 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     | hadoop.registry.dns.enabled | true| 
     | hadoop.registry.dns.zone-mask | 255.255.255.0  | 
     | hadoop.registry.dns.zone-subnet |172.17.0  |
+    | yarn.webapp.ui2.enable | true |
+    | yarn.timeline-service.http-cross-origin.enabled | true |
+    | yarn.resourcemanager.webapp.cross-origin.enabled | true |
+    | yarn.nodemanager.webapp.cross-origin.enabled | true |
     
+     **core-site.xml**
+
+    | Name        | Value      |
+    |-------------|------------|
+    | hadoop.http.cross-origin.enabled | true |
+ 
 * Ssh into each host and edit `/etc/hadoop/conf/container-executor.cfg` with below 
     ```
     min.user.id=50 
@@ -77,7 +87,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     ```
 
 ## Step 3 - Start Yarn-DNS, Rest API server and UI server
-Select a host where you want to start Yarn-DNS and Rest API server. I recommand to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
+Select a host where you want to start Yarn-DNS and Rest API server. I recommend to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
 * Login to host `c7202`
     ```
     vagrant ssh c7202
@@ -90,7 +100,6 @@ Select a host where you want to start Yarn-DNS and Rest API server. I recommand 
    ```
    sudo su - -c "/usr/hdp/current/hadoop-yarn-resourcemanager/sbin/yarn-daemon.sh start servicesapi" root
    ```
-* `TODO start new YARN UI` 
 * Setup `/user/root` direcotry on hdfs, this directory is used for storing service specific definitions.
     ```
     sudo su hdfs
@@ -117,7 +126,7 @@ This is required to make Yarn-DNS serve the DNS queries for your cluster. Replac
 
 ## Running the tests
 This test lets you launch a centos6 docker container on YARN.
-* Copy and paste below sample Json spec to `TODO native-service-UI` and click `deploy`. Or use [Postman](https://www.getpostman.com/) to post to this rest end point `http://c7202.ambari.apache.org:9191/services/v1/applications`
+* Copy and paste below sample Json spec to [Custom service deployment tab](http://c7201.ambari.apache.org:8088/ui2/#/yarn-deploy-service) and click `Deploy`. Or use [Postman](https://www.getpostman.com/) to post to this rest end point `http://c7202.ambari.apache.org:9191/services/v1/applications`
 * A simple centos6 Json spec:
     ```json
     {
@@ -140,7 +149,7 @@ This test lets you launch a centos6 docker container on YARN.
         ]
     }
     ```
-* Check if app named `ycloud-test` is running and container is launched at RM UI (http://c7201.ambari.apache.org:8088).
+* Check if app named `ycloud-test` is running and container is launched at [new RM UI](http://c7201.ambari.apache.org:8088/ui2).
 * Check if Yarn-DNS is working by pinging the container. Replace the ContainerId below with your actual `ContainerId` and use `-` instead of `_`.  For example, if you have ContainerId as such `container_e03_1494449095838_0004_01_000002`, try:
     ```
     ping ctr-e03-1494449095838_0004-01-000002.ycloud.dev
