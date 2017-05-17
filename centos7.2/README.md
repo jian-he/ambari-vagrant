@@ -146,3 +146,24 @@ This test lets you launch a centos6 docker container on YARN.
     ping ctr-e03-1494449095838_0004-01-000002.ycloud.dev
     ```
 * You are all set !
+
+## Troubleshoot
+* Try to reinstall `VirtualBox`, if you run into errors that cannot be resolved. Reinstalling `VirtualBox` will not lose existing VMs.
+* If you see below errors, try to run `vagrant plugin uninstall vagrant-vbguest`
+```
+Copy iso file /Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso into the box /tmp/VBoxGuestAdditions.iso
+mount: /dev/loop0 is write-protected, mounting read-only
+Installing Virtualbox Guest Additions 5.1.18 - guest version is 5.1.10
+Verifying archive integrity... All good.
+Uncompressing VirtualBox 5.1.18 Guest Additions for Linux...........
+VirtualBox Guest Additions installer
+Removing installed version 5.1.10 of VirtualBox Guest Additions...
+Copying additional installer modules ...
+Installing additional modules ...
+vboxadd.sh: Building Guest Additions kernel modules.
+Failed to set up service vboxadd, please check the log file
+/var/log/VBoxGuestAdditions.log for details.
+Redirecting to /bin/systemctl start  vboxadd.service
+Redirecting to /bin/systemctl start  vboxadd-service.service
+Job for vboxadd-service.service failed because the control process exited with error code. See "systemctl status vboxadd-service.service" and "journalctl -xe" for details.
+```
