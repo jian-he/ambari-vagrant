@@ -30,7 +30,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 * remove all OSes except `redhat7`. 
 * Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-209` is latest at the time of writing.
 * Click the eye icon and get the `HDP repo url` and `HDP-UTILS repo url`
-* Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-210`
+* Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-212`
 * Fill `HDP-UTILS-1.1.0.211`section with such as `http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7`
 ##### Page ``Install Options``
 * Fill the Target Hosts with below information if you have only provisioned 3 hosts
@@ -68,7 +68,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     | yarn.timeline-service.http-cross-origin.enabled | true |
     | yarn.resourcemanager.webapp.cross-origin.enabled | true |
     | yarn.nodemanager.webapp.cross-origin.enabled | true |
-    
+    | yarn.webapp.ui2.war-file-path | /usr/hdp/current/hadoop-yarn-resourcemanager/hadoop-yarn-ui-3.0.0.3.0.0.0-212.war |
      **core-site.xml**
 
     | Name        | Value      |
