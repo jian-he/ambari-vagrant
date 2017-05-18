@@ -46,11 +46,11 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 * Select services `HDFS`, `YARN + MapReduce2`, `ZooKeeper`, `Hbase`
 
 ##### Page `Assign Slaves and Clients`
-* Unselect `NFSGateway`, `Phoenix Query Server` as that is not required for testing.
+* Unselect `NFSGateway`, `Phoenix Query Server` as they are not required for testing.
 * Select `all` for `DataNode`, `NodeManager`, `RegionServer` and `Client`.
 
-### Configurations
-* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN component and restart all YARN services. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom yarn-site` section. 
+### Edit Configurations
+* After Ambari successfully installed HDP-3 cluster, set below configurations in YARN, HDFS, HBase components. `*` means Ambari has a different value set by default. You will need to add other new properties in the `Custom ` section. 
 
      **yarn-site.xml**
 
@@ -69,35 +69,94 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     | yarn.resourcemanager.webapp.cross-origin.enabled | true |
     | yarn.nodemanager.webapp.cross-origin.enabled | true |
     | yarn.webapp.ui2.war-file-path | /usr/hdp/current/hadoop-yarn-resourcemanager/hadoop-yarn-ui-3.0.0.3.0.0.0-212.war |
+    | *yarn.timeline-service.version | 2.0f |
+    | *yarn.nodemanager.aux-services | mapreduce_shuffle,timeline_collector |
+    | yarn.nodemanager.aux-services.timeline_collector.class | org.apache.hadoop.yarn.server.timelineservice.collector.PerNodeTimelineCollectorsAuxService |
+    | yarn.system-metrics-publisher.enabled | true |
+    | yarn.rm.system-metrics-publisher.emit-container-events | true |
+
      **core-site.xml**
 
     | Name        | Value      |
     |-------------|------------|
-    | hadoop.http.cross-origin.enabled | true |
+    | hadoop.http.cross-origin.enabled | `true` |
+    | hadoop.http.cross-origin.allowed-origins | `*`                                           | 
+    | hadoop.http.cross-origin.allowed-methods | `GET,POST,HEAD`                               |
+    | hadoop.http.cross-origin.allowed-headers | `X-Requested-With,Content-Type,Accept,Origin` |
+    | hadoop.http.cross-origin.max-age         | `1800` |
+
+     **hbase-site.xml**
+
+    | Name        | Value      |
+    |-------------|------------|
+    |*hbase.coprocessor.region.classes | org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,org.apache.hadoop.yarn.server.timelineservice.storage.flow.FlowRunCoprocessor|
+    
+
+ ### Enabling Timeline Service v.2
  
+ * Login into all the HBase installed machines and copy `hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-212.jar` into hbase lib:
+ 
+ 	```
+ 	sudo cp /usr/hdp/3.0.0.0-212/hadoop-yarn/hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-212.jar /usr/hdp/3.0.0.0-212/hbase/lib/
+ 	sudo cp /usr/hdp/3.0.0.0-212/hbase/conf/hbase-site.xml /usr/hdp/3.0.0.0-212/hadoop/etc/hadoop/
+ 	sudo chown yarn:hadoop /usr/hdp/3.0.0.0-212/hadoop/etc/hadoop/hbase-site.xml
+ 	```
+ * Create a table in HBase. logging into any one of the HBase service installed machine. 
+ 
+ 	```
+ 	sudo su - -c "/usr/hdp/3.0.0.0-212/hbase/bin/hbase org.apache.hadoop.yarn.server.timelineservice.storage.TimelineSchemaCreator" hbase
+ 	```
+ * Once table is created, cross verify that all table exists. Otherwise, previous command need to execute with -s options.
+ 
+ 	```
+ 	sudo su - -c "echo 'list'|hbase shell" hbase
+ 	```
+   Output of above should contains following table names. This ensure that your table creation is success.
+ 
+ 	```
+ 	timelineservice.app_flow                                                        
+ 	timelineservice.application                                                     
+ 	timelineservice.entity                                                          
+ 	timelineservice.flowactivity                                                    
+ 	timelineservice.flowrun
+ 	```
+ * Login into `c7202.ambari.apache.org`, assuming App Timeline Service daemon is running in this host and edit:
+ 	
+ 	```
+ 	sudo vi /usr/hdp/3.0.0.0-212/hadoop-yarn/bin/yarn.distro
+ 	```
+   Replace class name `org.apache.hadoop.yarn.server.applicationhistoryservice.ApplicationHistoryServer ` with `org.apache.hadoop.yarn.server.timelineservice.reader.TimelineReaderServer` under `timelineserver` section. Note that this only temporary step as long as Ambari integrates with ATSv2.
+
+
+
+### **Once above steps are done, restart `HDFS`, `YARN`, `HBase` services in Ambari.**
+* Verify that ATSv2 is enabled by accessing below url. Note that hostname in the URL must be the same as App Timeline Server running host from Ambari.
+   ```
+   http://c7202.ambari.apache.org:8188/ws/v2/timeline
+   ```
+### Enabling docker on YARN
 * Ssh into each host and edit `/etc/hadoop/conf/container-executor.cfg` with below 
     ```
     min.user.id=50 
     feature.docker.enabled=1
     ```
+    **Note that currently this config will be reset every time you restart YARN service on this host. You will have to re-edit it if you do so!**
 * Run below command on every host with your OKTA username and password to login. This will pull down the docker images for later testing. Note that until [YARN-5428](https://issues.apache.org/jira/browse/YARN-5428) gets resolved, we have to manually pull down the images.
     ```
     docker login registry.eng.hortonworks.com
     docker pull registry.eng.hortonworks.com/hortonworks/base-centos6:0.1.0.0-30
     ```
 
-## Step 3 - Start Yarn-DNS, Rest API server and UI server
+	
+## Step 3 - Start Yarn-DNS, Yarn Rest server
 Select a host where you want to start Yarn-DNS and Rest API server. I recommend to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
 * Login to host `c7202`
     ```
     vagrant ssh c7202
     ```
-* Start Yarn-DNS as root
+* Start Yarn-DNS and Yarn Rest server as root
     ```
     sudo su - -c "yarn org.apache.hadoop.registry.server.dns.RegistryDNSServer > /tmp/registryDNS.log 2>&1 &" root
-    ```
-* Start Rest API server as root
-   ```
    sudo su - -c "/usr/hdp/current/hadoop-yarn-resourcemanager/sbin/yarn-daemon.sh start servicesapi" root
    ```
 * Setup `/user/root` direcotry on hdfs, this directory is used for storing service specific definitions.
@@ -126,7 +185,7 @@ This is required to make Yarn-DNS serve the DNS queries for your cluster. Replac
 
 ## Running the tests
 This test lets you launch a centos6 docker container on YARN.
-* Copy and paste below sample Json spec to [Custom service deployment tab](http://c7201.ambari.apache.org:8088/ui2/#/yarn-deploy-service) and click `Deploy`. Or use [Postman](https://www.getpostman.com/) to post to this rest end point `http://c7202.ambari.apache.org:9191/services/v1/applications`
+* Copy and paste below sample Json spec to [custom service deployment tab](http://c7201.ambari.apache.org:8088/ui2/#/yarn-deploy-service) and click `Deploy`. Or use [Postman](https://www.getpostman.com/) to post to this rest end point `http://c7202.ambari.apache.org:9191/services/v1/applications`
 * A simple centos6 Json spec:
     ```json
     {
@@ -149,7 +208,7 @@ This test lets you launch a centos6 docker container on YARN.
         ]
     }
     ```
-* Check if app named `ycloud-test` is running and container is launched at [new RM UI](http://c7201.ambari.apache.org:8088/ui2).
+* Check if app named `ycloud-test` is running and container is launched at (http://c7201.ambari.apache.org:8088/ui2).
 * Check if Yarn-DNS is working by pinging the container. Replace the ContainerId below with your actual `ContainerId` and use `-` instead of `_`.  For example, if you have ContainerId as such `container_e03_1494449095838_0004_01_000002`, try:
     ```
     ping ctr-e03-1494449095838_0004-01-000002.ycloud.dev
@@ -176,3 +235,7 @@ Redirecting to /bin/systemctl start  vboxadd.service
 Redirecting to /bin/systemctl start  vboxadd-service.service
 Job for vboxadd-service.service failed because the control process exited with error code. See "systemctl status vboxadd-service.service" and "journalctl -xe" for details.
 ```
+* If `Components` page shows empty for the services, try accessing below url to verify if the data is actually posted into ATS. Note replace ApplicationId with your own Id.
+   ```
+   http://c7202.ambari.apache.org:8188/ws/v2/timeline/apps/application_1495138892714_0003/entities/COMPONENT?fields=ALL
+   ```
