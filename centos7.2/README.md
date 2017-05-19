@@ -148,15 +148,16 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     ```
 
 	
-## Step 3 - Start Yarn-DNS, Yarn Rest server
-Select a host where you want to start Yarn-DNS and Rest API server. I recommend to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
+## Step 3 - Start Yarn-DNS, Yarn REST server
+Select a host where you want to start Yarn-DNS and Yarn REST server. 
+I recommend to pick `c7202.ambari.apache.org` as that can avoid additional steps to edit configs.
 * Login to host `c7202`
     ```
     vagrant ssh c7202
     ```
 * Start Yarn-DNS and Yarn Rest server as root
-    ```
-    sudo su - -c "yarn org.apache.hadoop.registry.server.dns.RegistryDNSServer > /tmp/registryDNS.log 2>&1 &" root
+   ```
+   sudo su - -c "yarn org.apache.hadoop.registry.server.dns.RegistryDNSServer > /tmp/registryDNS.log 2>&1 &" root
    sudo su - -c "/usr/hdp/current/hadoop-yarn-resourcemanager/sbin/yarn-daemon.sh start servicesapi" root
    ```
 * Setup `/user/root` direcotry on hdfs, this directory is used for storing service specific definitions.
@@ -171,6 +172,26 @@ Select a host where you want to start Yarn-DNS and Rest API server. I recommend 
     sudo su hdfs
     yarn slider dependency --upload
     ``` 
+#### Enabling CORS proxy for Yarn REST server
+Since Yarn Rest server does not have CORS support, we need to install `CORS PROXY` on the host where Yarn REST server is running.
+* Add below configs in `configs.env` which could be found with command `find /tmp -name *.env` on host `c7201.ambari.apache.org`. Open that `configs.env` and edit below configs.
+  ```
+  localBaseAddress: "c7202.ambari.apache.org:1337"
+  timelineWebAddress: "c7202.ambari.apache.org:8188"
+  rmWebAddress: "c7201.ambari.apache.org:8088"
+  dashWebAddress: "c7202.ambari.apache.org:9191"
+  ```
+* Install `nodejs` and `npm` in `c7202.ambari.apache.org` where YARN REST server is running:
+  ```
+  sudo yum install epel-release
+  sudo yum install nodejs
+  sudo yum install npm
+  sudo npm install -g corsproxy
+  ```
+* Run corsproxy as below
+  ```
+  CORSPROXY_HOST=c7202.ambari.apache.org corsproxy &
+  ```
 
 ## Step 4 - Install DNSmasq on your mac
 
