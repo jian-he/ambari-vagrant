@@ -28,7 +28,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 
 ##### Page ``Select Version``:
 * remove all OSes except `redhat7`. 
-* Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-209` is latest at the time of writing.
+* Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-212` is latest at the time of writing.
 * Click the eye icon and get the `HDP repo url` and `HDP-UTILS repo url`
 * Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-212`
 * Fill `HDP-UTILS-1.1.0.211`section with such as `http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7`
@@ -59,7 +59,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     | *yarn.nodemanager.container-executor.class | org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor |
     | yarn.nodemanager.runtime.linux.docker.default-container-network | bridge |   
     | hadoop.registry.dns.bind-address | c7202.ambari.apache.org |
-    | hadoop.registry.dns.bind-port | 83|   
+    | hadoop.registry.dns.bind-port | 53|   
     | hadoop.registry.dns.domain-name | ycloud.dev|  
     | hadoop.registry.dns.enabled | true| 
     | hadoop.registry.dns.zone-mask | 255.255.255.0  | 
