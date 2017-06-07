@@ -28,9 +28,9 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 
 ##### Page ``Select Version``:
 * remove all OSes except `redhat7`. 
-* Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-212` is latest at the time of writing.
+* Found the last successful centos7 HDP-3 build in [RE repo](http://release.eng.hortonworks.com/portal/release/HDP/atlantic/3.0.0.0/). Build no. `3.0.0.0-219` is latest at the time of writing.
 * Click the eye icon and get the `HDP repo url` and `HDP-UTILS repo url`
-* Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-212`
+* Fill `HDP-3.0` section with your HDP repo url such as: ` http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.0.0.0-219`
 * Fill `HDP-UTILS-1.1.0.211`section with such as `http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7`
 ##### Page ``Install Options``
 * Fill the Target Hosts with below information if you have only provisioned 3 hosts
@@ -68,7 +68,6 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
     | yarn.timeline-service.http-cross-origin.enabled | true |
     | yarn.resourcemanager.webapp.cross-origin.enabled | true |
     | yarn.nodemanager.webapp.cross-origin.enabled | true |
-    | yarn.webapp.ui2.war-file-path | /usr/hdp/current/hadoop-yarn-resourcemanager/hadoop-yarn-ui-3.0.0.3.0.0.0-212.war |
     | *yarn.timeline-service.version | 2.0f |
     | *yarn.nodemanager.aux-services | mapreduce_shuffle,timeline_collector |
     | yarn.nodemanager.aux-services.timeline_collector.class | org.apache.hadoop.yarn.server.timelineservice.collector.PerNodeTimelineCollectorsAuxService |
@@ -94,17 +93,17 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
 
  ### Enabling Timeline Service v.2
  
- * Login into all the HBase installed machines and copy `hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-212.jar` into hbase lib:
+ * Login into all the HBase installed machines and copy `hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-219.jar` into hbase lib:
  
  	```
- 	sudo cp /usr/hdp/3.0.0.0-212/hadoop-yarn/hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-212.jar /usr/hdp/3.0.0.0-212/hbase/lib/
- 	sudo cp /usr/hdp/3.0.0.0-212/hbase/conf/hbase-site.xml /usr/hdp/3.0.0.0-212/hadoop/etc/hadoop/
- 	sudo chown yarn:hadoop /usr/hdp/3.0.0.0-212/hadoop/etc/hadoop/hbase-site.xml
+ 	sudo cp /usr/hdp/3.0.0.0-219/hadoop-yarn/hadoop-yarn-server-timelineservice-hbase-3.0.0.3.0.0.0-219.jar /usr/hdp/3.0.0.0-219/hbase/lib/
+ 	sudo cp /usr/hdp/3.0.0.0-219/hbase/conf/hbase-site.xml /usr/hdp/3.0.0.0-219/hadoop/etc/hadoop/
+ 	sudo chown yarn:hadoop /usr/hdp/3.0.0.0-219/hadoop/etc/hadoop/hbase-site.xml
  	```
  * Create a table in HBase. logging into any one of the HBase service installed machine. 
  
  	```
- 	sudo su - -c "/usr/hdp/3.0.0.0-212/hbase/bin/hbase org.apache.hadoop.yarn.server.timelineservice.storage.TimelineSchemaCreator" hbase
+ 	sudo su - -c "/usr/hdp/3.0.0.0-219/hbase/bin/hbase org.apache.hadoop.yarn.server.timelineservice.storage.TimelineSchemaCreator" hbase
  	```
  * Once table is created, cross verify that all table exists. Otherwise, previous command need to execute with -s options.
  
@@ -123,7 +122,7 @@ Navigate to Ambari (http://c7201.ambari.apache.org:8080) to install the HDP clus
  * Login into `c7202.ambari.apache.org`, assuming App Timeline Service daemon is running in this host and edit:
  	
  	```
- 	sudo vi /usr/hdp/3.0.0.0-212/hadoop-yarn/bin/yarn.distro
+ 	sudo vi /usr/hdp/3.0.0.0-219/hadoop-yarn/bin/yarn.distro
  	```
    Replace class name `org.apache.hadoop.yarn.server.applicationhistoryservice.ApplicationHistoryServer ` with `org.apache.hadoop.yarn.server.timelineservice.reader.TimelineReaderServer` under `timelineserver` section. Note that this only temporary step as long as Ambari integrates with ATSv2.
 
